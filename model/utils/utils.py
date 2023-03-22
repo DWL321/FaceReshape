@@ -6,7 +6,7 @@ from subprocess import DEVNULL, check_call, check_output
 
 from tqdm import tqdm as std_tqdm
 
-from track.utils.log_utils import TEDIUM, log
+from model.utils.log_utils import TEDIUM, log
 
 tqdm = partial(std_tqdm, bar_format="{l_bar}{bar:30}{r_bar}{bar:-30b}")
 

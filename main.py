@@ -7,13 +7,13 @@ import numpy as np
 from PIL import Image
 from reshape import Reshape
 from tracker import Track
-from track.data.params import ReconParams
+from model.data.params import ReconParams
 
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Video Demo")
 
-    parser.add_argument("mode", type=str, default="video", help="video or image")
+    parser.add_argument("--mode", type=str, default="video", help="video or image")
     parser.add_argument("--src_video", type=str, default="dataset/videos/3.mp4", help="the source face video")
     parser.add_argument("--src_image", type=str, default="dataset/videos/5.jpg", help="the target dace image")
     parser.add_argument("--tar_image", type=str, default="dataset/videos/5.jpg", help="the target face image")
@@ -41,13 +41,15 @@ if __name__ == "__main__":
     track_model = Track()
     if args.mode == "video":
         track_model.track_video(args.src_video, args.result_root + "/src")
+        track_model.get_recon()
         track_model.track_image(args.tar_image, args.result_root + "/tar")
+        track_model.get_recon()
     elif args.mode == "image":
         track_model.track_image(args.src_image, args.result_root + "/src")
+        track_model.get_recon()
     else:
         print("wrong mode")
         raise SystemExit()
-    track_model.get_recon()
 
     rehape_model = Reshape("pretrained/reshape/verts.txt")
     src_img = cv2.imread(osp.join(args.result_root, "src", "imgs", "00000.jpg"))

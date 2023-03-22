@@ -8,11 +8,11 @@ import numpy as np
 from PIL import Image
 from tqdm import tqdm
 
-from track.flame.flame import FLAME
-from track.utils.renderer import NvDiffRenderer
-from reshape.geo_transform import forward_rott
-from reshape.mls import mls_deformation
-from reshape.util import forward_transform
+from model.flame.flame import FLAME
+from model.utils.renderer import NvDiffRenderer
+from model.reshape.geo_transform import forward_rott
+from model.reshape.mls import mls_deformation
+from model.reshape.util import forward_transform
 import torch.nn.functional as F
 
 

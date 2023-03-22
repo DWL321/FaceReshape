@@ -6,11 +6,11 @@ import cv2
 import numpy as np
 import torch
 
-from track.landmarks import Detector
-from track.matting import BgMatter
-from track.recon import Recon
-from track.utils.utils import tqdm
-from track.utils.log_utils import log
+from model.landmarks import Detector
+from model.matting import BgMatter
+from model.recon import Recon
+from model.utils.utils import tqdm
+from model.utils.log_utils import log
 
 
 def euler2rot(euler_angle):

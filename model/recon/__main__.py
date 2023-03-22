@@ -1,6 +1,6 @@
 import argparse
 
-from track.recon.model import Recon
+from model.recon.model import Recon
 
 
 def parse_args():
