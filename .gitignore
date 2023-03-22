@@ -1,0 +1,12 @@
+others
+**/*.pyc
+**/__pycache__
+*.pyc
+__pycache__
+*.egg-info
+face-track_
+facetrack
+pretrained
+reshape_self.py
+nvdiffrast
+dataset
