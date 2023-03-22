@@ -7,7 +7,7 @@ import torch
 class ReconParams:
     """Recon params stored in `recon_params.pt`"""
 
-    def __init__(self, dir_or_path, legacy=True):
+    def __init__(self, dir_or_path):
         if os.path.isdir(dir_or_path):
             file_path = pjoin(dir_or_path, "recon_params.pt")
         else:
@@ -15,27 +15,13 @@ class ReconParams:
 
         recon_params = torch.load(file_path, map_location="cpu")
 
-        self.legacy = legacy
-        if legacy:
-            # fmt: off
-            self.shape_params = recon_params["shape_code"]              ## shape (n_frames, 300)
-            self.expr_params = recon_params["exp_para"]                 ## shape (n_frames, 9)
-            self.flame_pose_params = recon_params["flame_pose_params"]  ## shape (n_frames, 100)
-            self.cam_poses = recon_params["cam_poses"]                  ## shape (n_frames, 6) --- rot, trans
-            self.cam_params = recon_params["cam_para"]                  ## shape (n_frames, 4) --- fx, fy, cx, cy
-            # fmt: on
-            self.flame_shape_params = self.shape_params
-            self.flame_expr_params = self.expr_params
-            self.cam_extris = self.cam_poses
-            self.cam_intris = self.cam_params
-        else:
-            # fmt: off
-            self.flame_shape_params = recon_params["flame_shape_params"]  ## shape (n_frames, 300)
-            self.flame_expr_params = recon_params["flame_expr_params"]    ## shape (n_frames, 9)
-            self.flame_pose_params = recon_params["flame_pose_params"]    ## shape (n_frames, 100)
-            self.cam_extris = recon_params["cam_extris"]                  ## shape (n_frames, 6) --- rot, trans
-            self.cam_intris = recon_params["cam_intris"]                  ## shape (n_frames, 4) --- fx, fy, cx, cy
-            # fmt: on
+        # fmt: off
+        self.flame_shape_params = recon_params["flame_shape_params"]  ## shape (n_frames, 300)
+        self.flame_expr_params = recon_params["flame_expr_params"]    ## shape (n_frames, 9)
+        self.flame_pose_params = recon_params["flame_pose_params"]    ## shape (n_frames, 100)
+        self.cam_extris = recon_params["cam_extris"]                  ## shape (n_frames, 6) --- rot, trans
+        self.cam_intris = recon_params["cam_intris"]                  ## shape (n_frames, 4) --- fx, fy, cx, cy
+        # fmt: on
 
     def __len__(self):
         return len(self.flame_expr_params)
