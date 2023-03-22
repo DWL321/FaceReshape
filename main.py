@@ -18,7 +18,7 @@ def parse_args():
     parser.add_argument("--src_image", type=str, default="dataset/videos/5.jpg", help="the target dace image")
     parser.add_argument("--tar_image", type=str, default="dataset/videos/5.jpg", help="the target face image")
     parser.add_argument("--result_root", default="result", type=str, help="the result file path")
-    parser.add_argument("-- tar", type=str, default="thinner", help="thinner or fatter or shorter or longer")
+    parser.add_argument("--tar", type=str, default="thinner", help="thinner or fatter or shorter or longer")
 
     args = parser.parse_args()
     return args

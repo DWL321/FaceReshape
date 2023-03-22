@@ -17,7 +17,7 @@ class ReconParams:
 
         # fmt: off
         self.flame_shape_params = recon_params["flame_shape_params"]  ## shape (n_frames, 300)
-        self.flame_expr_params = recon_params["flame_expr_params"]    ## shape (n_frames, 9)
+        self.flame_expr_params = recon_params["flame_exp_params"]    ## shape (n_frames, 9)
         self.flame_pose_params = recon_params["flame_pose_params"]    ## shape (n_frames, 100)
         self.cam_extris = recon_params["cam_extris"]                  ## shape (n_frames, 6) --- rot, trans
         self.cam_intris = recon_params["cam_intris"]                  ## shape (n_frames, 4) --- fx, fy, cx, cy
