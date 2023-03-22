@@ -10,3 +10,4 @@ pretrained
 reshape_self.py
 nvdiffrast
 dataset
+result
