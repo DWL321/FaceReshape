@@ -149,22 +149,22 @@ def get_compare_video(src_root, result_root, input_video):
 
 # 调整flame_shape_code参数编辑脸型
 def change_shape_code(shape, mode):
-    if mode == "thinner":
+    if mode == "fatter":
         shape[0] = shape[0] * 0.001
         shape[1] = shape[1] * 0.0001
         shape[2] = shape[2] * 4
         shape[3] = shape[3] * 0.05
-    if mode == "fatter":
-        shape[0] = shape[0] * 8
-        shape[1] = shape[1] * 8
-        shape[2] = shape[2] * 6
-        shape[3] = shape[3] * 8
-    if mode == "shorter":
-        shape[0] = shape[0] * 2
-        shape[1] = shape[1] * 8
-        shape[2] = shape[2] * 8
-        shape[3] = shape[3] * 2
     if mode == "longer":
+        shape[0] = shape[0] * 1
+        shape[1] = shape[1] * 0.1
+        shape[2] = shape[2] * 8
+        shape[3] = shape[3] * 1
+    if mode == "thinner":
+        shape[0] = shape[0] * 2
+        shape[1] = shape[1] * 4
+        shape[2] = shape[2] * 4
+        shape[3] = shape[3] * 2
+    if mode == "shorter":
         shape[0] = shape[0] * 6
         shape[1] = shape[1] * 0.5
         shape[2] = shape[2] * 4
@@ -201,7 +201,7 @@ class Reshape:
             self.recon_t = True
 
     def check_init(self):
-        if self.grid and self.recon:
+        if self.grid and self.recon_s:
             return True
         else:
             if not self.grid:
@@ -360,7 +360,6 @@ class Reshape:
         os.makedirs(result_root, exist_ok=True)
 
         # 得到源人脸特征点的三维坐标(id+表情+姿态)
-        self.src_recon.flame_shape_params[0] = self.src_shape
         vs = self.flame_model.forward_geo(*(self.src_recon.get_flame_params([0])))
 
         # 得到源人脸的mask，坐标值归一化
@@ -386,7 +385,7 @@ class Reshape:
             conts_ws.append(cont_ws)
             conts_fs.append(cont_fs)
         # 得到变形后人脸特征点的三维坐标
-        self.src_recon.flame_shape_params[0] = change_shape_code(self.src_shape, mode)
+        self.src_recon.flame_shape_params[0] = change_shape_code(self.src_recon.flame_shape_params[0], mode)
         tar_vs = self.flame_model.forward_geo(*(self.src_recon.get_flame_params([0])))
 
         # tar_mask start

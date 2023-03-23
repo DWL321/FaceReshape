@@ -61,8 +61,8 @@ if __name__ == "__main__":
         tar_recon = get_recon_params(osp.join(args.result_root, "tar"), "recon_params.pt")
         rehape_model.set_recon_parm(src_recon, tar_recon)
         # 变形视频:初始化参数,输入图片文件夹路径 保存路径 视频名称
-        rehape_model.shape_swap(args.result_root + "/src", args.result_root + "/result", args.video)
+        rehape_model.shape_swap(args.result_root + "/src", args.result_root + "/result", args.src_video)
     else:
         rehape_model.set_recon_parm(src_recon)
         image = np.array(Image.open(args.src_image))
-        rehape_model.reshape(image, args.result_root + "/result", "output.jpg", args.tar)
+        rehape_model.reshape(image, args.result_root + "/result", "output_" + args.tar + ".jpg", args.tar)
