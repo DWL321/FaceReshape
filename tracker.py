@@ -7,7 +7,6 @@ import numpy as np
 import torch
 
 from model.landmarks import Detector
-from model.matting import BgMatter
 from model.recon import Recon
 from model.utils.utils import tqdm
 from model.utils.log_utils import log
@@ -132,7 +131,3 @@ class Track:
             fps=self.fps,
             debug=self.video,
         )
-
-        # # background matting
-        # matter = BgMatter()
-        # matter.process_folder(self.result_root, self.img_folder, self.fg_img_folder, max_frames=self.max_frames)
