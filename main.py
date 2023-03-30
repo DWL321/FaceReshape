@@ -8,6 +8,7 @@ from PIL import Image
 from reshape import Reshape
 from tracker import Track
 from model.data.params import ReconParams
+from model.reshape.u2net_human import get_human_mask
 
 
 def parse_args():
@@ -51,6 +52,8 @@ if __name__ == "__main__":
         print("wrong mode")
         raise SystemExit()
 
+    get_human_mask(osp.join(args.result_root, "src", "imgs"), args.result_root)
+
     rehape_model = Reshape("pretrained/reshape/verts.txt")
     src_img = cv2.imread(osp.join(args.result_root, "src", "imgs", "00000.jpg"))
     H = src_img.shape[0]
@@ -65,4 +68,5 @@ if __name__ == "__main__":
     else:
         rehape_model.set_recon_parm(src_recon)
         image = np.array(Image.open(args.src_image))
-        rehape_model.reshape(image, args.result_root + "/result", "output_" + args.tar + ".jpg", args.tar)
+        gray = cv2.imread(osp.join(args.result_root, "mask", "00000.jpg"), 0)
+        rehape_model.reshape(image, gray[None], args.result_root + "/result", "output_" + args.tar + ".jpg", args.tar)

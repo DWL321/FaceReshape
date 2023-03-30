@@ -148,24 +148,11 @@ def mls_similarity_deformation(vy, vx, p, q, alpha=1.0, eps=1e-8):
 # p控制点变化前坐标，q控制点变化后坐标
 # mode：AFFINE仿射变换，SIMILARITY相似变换（仅包含平移、旋转和一致的放缩），RIGID刚性变换（仅包含平移和旋转）
 # image原图片，vy和vx是meshgrid()生成的原图像像素坐标矩阵
-def mls_deformation(image, p, q, vy, vx):
+def mls_deformation(p, q, vy, vx):
     p = torch.tensor(np.array(p)).reshape(-1, 2).cuda()
     p[:, [0, 1]] = p[:, [1, 0]]
     q = torch.tensor(np.array(q)).cuda()
     q[:, [0, 1]] = q[:, [1, 0]]
     transform = mls_similarity_deformation(vy, vx, p, q, alpha=1)
 
-    # # 双线性插值，稀疏变稠密
-    transform_ = (
-        (
-            F.interpolate(transform.unsqueeze(0), scale_factor=1, mode="bilinear", align_corners=True)
-            .reshape(2, transform.shape[1], transform.shape[2])
-            .type(torch.int)
-        )
-        .cpu()
-        .numpy()
-    )
-    aug = np.ones_like(image)
-    aug[vx, vy] = image[tuple(transform_)]
-
-    return aug, transform
+    return transform

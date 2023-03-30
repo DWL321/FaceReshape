@@ -1,7 +1,6 @@
 import os
 import os.path as osp
 import matplotlib
-import matplotlib.pyplot as plt
 import torch
 import cv2
 import numpy as np
@@ -13,6 +12,7 @@ from model.utils.renderer import NvDiffRenderer
 from model.reshape.geo_transform import forward_rott
 from model.reshape.mls import mls_deformation
 from model.reshape.util import forward_transform
+from model.reshape.energy import opt
 import torch.nn.functional as F
 
 
@@ -95,6 +95,23 @@ def add_edge_points(H, W, conts, tar_contps):
         (tar_contps, H_edge_points_l, H_edge_points_r, W_edge_points_b, W_edge_points_t), axis=0
     )
     return conts, tar_contps
+
+
+def bilinear(transform, vx, vy, image):
+    # 双线性插值
+    transform_ = (
+        (
+            F.interpolate(transform.unsqueeze(0), scale_factor=1, mode="bilinear", align_corners=True)
+            .reshape(2, transform.shape[1], transform.shape[2])
+            .type(torch.int)
+        )
+        .cpu()
+        .numpy()
+    )
+    aug = np.ones_like(image)
+    aug[vx, vy] = image[tuple(transform_)]
+
+    return aug
 
 
 # 拼接结果视频
@@ -244,7 +261,7 @@ class Reshape:
         tar_contps = np.array(tar_contps)
         return tar_contps
 
-    def reshape_one_pic(self, image, sid, result_root, result_name):
+    def reshape_one_pic(self, image, sid, result_root, result_name, gray):
         if not self.recon_t:
             print("please set target recon parameters")
         if not self.check_init() or not self.recon_t:
@@ -301,9 +318,10 @@ class Reshape:
         # 固定边界点
         conts, tar_contps = add_edge_points(self.W, self.H, conts, tar_contps)
 
-        # MLS
-        # Define deformation grid
-        aug, transform = mls_deformation(image, conts, tar_contps, self.vy, self.vx)
+        # 二维图像变形
+        transform = mls_deformation(conts, tar_contps, self.vy, self.vx)
+        transform = opt(self.H, self.W, gray, transform, [self.vx, self.vy])
+        aug = bilinear(transform, self.vx, self.vy, image)
         matplotlib.image.imsave(osp.join(result_root, result_name), aug)
         return transform
 
@@ -319,29 +337,16 @@ class Reshape:
         if src_pic_num % 2 == 0:
             sid = src_pic_num - 1
             image = np.array(Image.open(osp.join(src_root, img_folder, "%05d.jpg" % sid)))
-            self.reshape_one_pic(image, sid, result_root + "/result_mls", "%05d.jpg" % sid)
+            gray = cv2.imread(osp.join(result_root, "../mask", "%05d.jpg" % sid), 0)
+            self.reshape_one_pic(image, sid, result_root + "/result_mls", "%05d.jpg" % sid, gray[None])
 
         for sid in tqdm(range(0, src_pic_num, 2)):
             image = np.array(Image.open(osp.join(src_root, img_folder, "%05d.jpg" % sid)))
-            transform = self.reshape_one_pic(image, sid, result_root + "/result_mls", "%05d.jpg" % sid)
+            gray = cv2.imread(osp.join(result_root, "../mask", "%05d.jpg" % sid), 0)
+            transform = self.reshape_one_pic(image, sid, result_root + "/result_mls", "%05d.jpg" % sid, gray[None])
             if sid:
-                transform_ = (
-                    (
-                        F.interpolate(
-                            ((transform + last_transform) / 2).unsqueeze(0),
-                            scale_factor=1,
-                            mode="bilinear",
-                            align_corners=True,
-                        )
-                        .reshape(2, transform.shape[1], transform.shape[2])
-                        .type(torch.int)
-                    )
-                    .cpu()
-                    .numpy()
-                )
                 image = np.array(Image.open(osp.join(src_root, img_folder, "%05d.jpg" % (sid - 1))))
-                aug = np.ones_like(image)
-                aug[self.vx, self.vy] = image[tuple(transform_)]
+                aug = bilinear((transform + last_transform) / 2, self.vx, self.vy, image)
                 matplotlib.image.imsave(osp.join(result_root, "result_mls", "%05d.jpg" % (sid - 1)), aug)
             last_transform = transform
 
@@ -352,7 +357,7 @@ class Reshape:
         # 拼接对比视频
         get_compare_video(src_root, result_root, input_video)
 
-    def reshape(self, image, result_root, result_name, mode):
+    def reshape(self, image, gray, result_root, result_name, mode):
         if not self.check_init():
             print("reshape failed")
             return None
@@ -408,7 +413,8 @@ class Reshape:
         # 固定边界点
         conts, tar_contps = add_edge_points(self.W, self.H, conts, tar_contps)
 
-        # MLS
-        # Define deformation grid
-        aug, transform = mls_deformation(image, conts, tar_contps, self.vy, self.vx)
+        # 二维图像变形
+        transform = mls_deformation(conts, tar_contps, self.vy, self.vx)
+        transform = opt(self.H, self.W, gray, transform, [self.vx, self.vy])
+        aug = bilinear(transform, self.vx, self.vy, image)
         matplotlib.image.imsave(osp.join(result_root, result_name), aug)
